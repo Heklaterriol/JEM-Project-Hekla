@@ -124,7 +124,7 @@
             }
 
             this.map = new google.maps.Map(
-                $(this.options.map)[0],
+                $.find(this.options.map)[0],
                 this.options.mapOptions
             );
 
@@ -272,7 +272,7 @@
             if (this.options.detailsScope) {
                 var $details = $(this.input).parents(this.options.detailsScope).find(this.options.details);
             } else {
-                var $details = $(this.options.details);
+                var $details = $.find(this.options.details);
             }
 
             var attribute = this.options.detailsAttribute,
