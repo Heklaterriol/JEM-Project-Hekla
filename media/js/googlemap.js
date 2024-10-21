@@ -44,7 +44,18 @@ function initialize() {
 
         var boxText = document.createElement("div");
         boxText.style.cssText = "border: 1px solid black; margin-top: 8px; background: yellow; padding: 5px;";
-        boxText.innerHTML = "<b>" + title + "</b><br>" + street + "<br>" + postalCode + "<br>" + city;
+        function escapeHTML(str) {
+        return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+        }
+        boxText.innerHTML = "<strong>" + escapeHTML(title) + "</strong><br />" + 
+                    escapeHTML(street) + "<br />" + 
+                    escapeHTML(postalCode) + "<br />" + 
+                    escapeHTML(city);
 
         var myOptions = {
             content: boxText
@@ -95,7 +106,18 @@ function initialize() {
 
                     var boxText = document.createElement("div");
                     boxText.style.cssText = "border: 1px solid black; margin-top: 8px; background: yellow; padding: 5px;";
-                    boxText.innerHTML = "<b>" + title + "</b><br>" + street + "<br>" + postalCode + "<br>" + city;
+                    function escapeHTML(str) {
+                    return str
+                    	.replace(/&/g, '&amp;')
+                    	.replace(/</g, '&lt;')
+                    	.replace(/>/g, '&gt;')
+                    	.replace(/"/g, '&quot;')
+                    	.replace(/'/g, '&#039;');
+                    }
+                    boxText.innerHTML = "<strong>" + escapeHTML(title) + "</strong><br />" + 
+                    	escapeHTML(street) + "<br />" + 
+                    	escapeHTML(postalCode) + "<br />" + 
+                    	escapeHTML(city);
 
                     var myOptions = {
                         content: boxText
