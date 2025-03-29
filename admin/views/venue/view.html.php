@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -35,11 +35,6 @@ class JemViewVenue extends JemAdminView
 			return false;
 		}
 
-		// HTMLHelper::_('behavior.framework');
-		// HTMLHelper::_('behavior.modal', 'a.modal');
-		// HTMLHelper::_('behavior.tooltip');
-		// HTMLHelper::_('behavior.formvalidation');
-
 		//initialise variables
         $app = Factory::getApplication();
         $this->document = $app->getDocument();
@@ -50,8 +45,6 @@ class JemViewVenue extends JemAdminView
 		$wa = $app->getDocument()->getWebAssetManager();
 	
 		// Load css
-		// HTMLHelper::_('stylesheet', 'com_jem/backend.css', array(), true);
-		// HTMLHelper::_('stylesheet', 'com_jem/geostyle.css', array(), true);
 		$wa->registerStyle('jem.backend', 'com_jem/backend.css')->useStyle('jem.backend');
 		$wa->registerStyle('jem.geostyle', 'com_jem/geostyle.css')->useStyle('jem.geostyle');
 
@@ -70,7 +63,7 @@ class JemViewVenue extends JemAdminView
 		// $this->document->addScript('https://maps.googleapis.com/maps/api/js?'.(!empty($key) ? 'key='.$key.'&amp;' : '').'sensor=false&amp;libraries=places&language='.$language);
 
 		// Noconflict
-		$this->document->addCustomTag('<script type="text/javascript">jQuery.noConflict();</script>');
+		$this->document->addCustomTag('<script>jQuery.noConflict();</script>');
 
 		// JQuery scripts
 		// $this->document->addScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js');

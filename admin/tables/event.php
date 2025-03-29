@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -53,6 +53,7 @@ class JemTableEvent extends Table
 
 		// Search for the {readmore} tag and split the text up accordingly.
 		if (isset($array['articletext'])) {
+			$array['articletext'] = preg_replace('/(\r\n)*<hr id=\'system-readmore\'>(\r\n)*/', '<hr id=\'system-readmore\'>', $array['articletext']);
 			$pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
 			$tagPos = preg_match($pattern, $array['articletext']);
 
@@ -233,9 +234,8 @@ class JemTableEvent extends Table
 				}
 
 				if (!empty($file['name'])) {
-					// only on first event, skip on recurrence events
-					
-					if (empty($this->recurrence_first_id)) {
+					// only on first event, skip on recurrence events					
+					//if (empty($this->recurrence_first_id)) {
 						//check the image
 						$check = JemImage::check($file, $jemsettings);
 
@@ -249,7 +249,7 @@ class JemTableEvent extends Table
 								$this->datimage = $filename;
 							}
 						}
-					}
+					//}
 				} elseif (!empty($removeimage)) {
 					// if removeimage is non-zero remove image from event
 					// (file will be deleted later (e.g. housekeeping) if unused)

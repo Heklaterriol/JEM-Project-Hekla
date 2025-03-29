@@ -2,7 +2,7 @@
 /**
  * @version    4.2.3
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -123,12 +123,14 @@ class com_jemInstallerScript
             </p> <?php
         }
 
-
         $param_array = array(
             "event_comunoption"=>"0",
             "event_comunsolution"=>"0",
             "event_show_attendeenames"=>"2",
             "event_show_more_attendeedetails"=>"0",
+            "event_show_venue_name"=>"1",
+            "event_show_category"=>"1",
+            "event_link_category"=>"1",
             "event_show_author"=>"1",
             "event_lg"=>"",
             "event_link_author"=>"1",
@@ -149,6 +151,9 @@ class com_jemInstallerScript
             "editevent_show_attachment_tab"=>"0",
             "editevent_show_other_tab"=>"0",
             "global_display"=>"1",
+			"global_editevent_starttime_limit"=>"0",
+			"global_editevent_endtime_limit"=>"23",
+			"global_editevent_minutes_block"=>"1",
             "global_regname"=>"1",
             "global_show_archive_icon"=>"1",
             "global_show_filter"=>"1",
@@ -262,6 +267,11 @@ class com_jemInstallerScript
 
 			// Check columns in database
 			$this->checkColumnsIntoDatabase();
+			
+			// Verify the data type of 'unregistra_until' in the database
+			if($this->oldRelease < '4.3.1'){
+				$this->checkUnregistraUntil();
+			}
 
             // Ensure css files are (over)writable
             $this->makeFilesWritable();
@@ -834,6 +844,47 @@ class com_jemInstallerScript
                 // simply continue with next table
             }
         }
-    }
+    }	
+	
+	/**
+	 * Verify the data type of 'unregistra_until' in the database when JEM version < 4.3.1
+     *
+     * @return void
+     */
+    private function checkUnregistraUntil()
+    {
+		$db = Factory::getContainer()->get('DatabaseDriver');      		
+
+    	try {
+			
+	        $query = "ALTER TABLE `#__jem_events` CHANGE `unregistra_until` `unregistra_until` INT(11) NULL DEFAULT '0'";
+	        $db->setQuery($query);
+	        $db->execute();
+
+	        $query = "UPDATE `#__jem_events` SET `unregistra_until` = NULL WHERE `unregistra_until` = 0";
+	        $db->setQuery($query);
+	        $db->execute();       
+			
+	        $query = "UPDATE `#__jem_events` SET `unregistra_until` = NULL WHERE `unregistra_until` != 0 AND (times IS NULL OR dates IS NULL)";
+	        $db->setQuery($query);
+	        $db->execute();       
+
+	        $query = "ALTER TABLE `#__jem_events` CHANGE `unregistra_until` `unregistra_until` VARCHAR(20) NULL";
+	        $db->setQuery($query);
+	        $db->execute();
+			
+			$query = "UPDATE `#__jem_events` SET `unregistra_until` = DATE_FORMAT(DATE_SUB(CONCAT(`dates`, ' ', `times`), INTERVAL `unregistra_until` HOUR),'%Y-%m-%d %H:%i:%s') WHERE `unregistra_until` != 0 AND `times` IS NOT NULL AND `dates` IS NOT NULL";
+	        $db->setQuery($query);
+    	    $db->execute();
+
+            $query = "ALTER TABLE `#__jem_events` CHANGE `unregistra_until` `unregistra_until` DATETIME DEFAULT NULL";
+			$db->setQuery($query);
+			$db->execute();
+
+	    } catch (\Exception $e) {    
+	        echo "Error updating `unregistra_until`: " . $e->getMessage();
+    	}
+
+}
 
 }

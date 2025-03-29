@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -66,11 +66,10 @@ class JemViewImagehandler extends HtmlView
 		$app->allowCache(false);
 
 		// Load css
-		// HTMLHelper::_('stylesheet', 'com_jem/backend.css', array(), true);
 		$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
-	
 		$wa->registerStyle('jem.backend', 'com_jem/backend.css')->useStyle('jem.backend');
-		//get images
+		
+		// Get images
 		$images = $this->get('images');
 		$pagination = $this->get('Pagination');
 
@@ -118,9 +117,7 @@ class JemViewImagehandler extends HtmlView
 		$task = Factory::getApplication()->input->get('task', '');
 
 		// Load css
-		// HTMLHelper::_('stylesheet', 'com_jem/backend.css', array(), true);
-		$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
-	
+		$wa = Factory::getApplication()->getDocument()->getWebAssetManager();	
 		$wa->registerStyle('jem.backend', 'com_jem/backend.css')->useStyle('jem.backend');
 
 		$ftp = ClientHelper::setCredentialsFromRequest('ftp');

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  *
@@ -17,7 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Uri\Uri;
 
-$this->document->addScript(Uri::root(true) . 'media/com_jem/js/recurrence.js');
+$this->document->addScript(Uri::root(true) . '/media/com_jem/js/recurrence.js');
 
 $options = array(
     'onActive' => 'function(title, description){
@@ -45,7 +45,7 @@ $params = $params->toArray();
 
 ?>
 
-<script type="text/javascript">
+<script>
     function checkmaxplaces()
     {
         $('#jform_maxplaces').on('change', function(){
@@ -111,7 +111,7 @@ $params = $params->toArray();
         document.getElementById('comm1').style.display = 'none';
     }
 </script>
-<script type="text/javascript">
+<script>
     Joomla.submitbutton = function(task)
     {
         if (task == 'event.cancel' || document.formvalidator.isValid(document.getElementById('event-form'))) {
@@ -223,6 +223,8 @@ $params = $params->toArray();
                     <li><div class="label-form"><?php echo $this->form->renderfield('contactid'); ?></div></li>
                     <li><div class="label-form"><?php echo $this->form->renderfield('published'); ?></div></li>
                     <li><div class="label-form"><?php echo $this->form->renderfield('featured'); ?></div></li>
+                    <li><div class="label-form"><?php echo $this->form->renderfield('publish_up'); ?></div></li>
+                    <li><div class="label-form"><?php echo $this->form->renderfield('publish_down'); ?></div></li>
                     <li><div class="label-form"><?php echo $this->form->renderfield('access'); ?></div></li>
                 </ul>
             </fieldset>
@@ -310,6 +312,9 @@ $params = $params->toArray();
                                 <li><div class="label-form"><?php echo $this->form->renderfield('registra_until'); ?></div></li>
                                 <li><div class="label-form"><?php echo $this->form->renderfield('unregistra'); ?></div></li>
                                 <li><div class="label-form"><?php echo $this->form->renderfield('unregistra_until'); ?></div></li>
+                                <?php if($this->jemsettings->regallowinvitation) { ?>
+                                	<li><div class="label-form"><?php echo $this->form->renderfield('reginvitedonly'); ?></div></li>
+                                <?php } ?>
                                 <li><div class="label-form"><?php echo $this->form->renderfield('maxplaces'); ?></div></li>
                                 <li><div class="label-form"><?php echo $this->form->renderfield('minbookeduser'); ?></div></li>
                                 <li><div class="label-form"><?php echo $this->form->renderfield('maxbookeduser'); ?></div></li>
@@ -366,7 +371,7 @@ $params = $params->toArray();
                                 <li><div class="label-form"><?php echo $this->form->renderfield('recurrence_type', null, $recurr->recurrence_type); ?></div></li>
                                 <li id="recurrence_output" class="m-3">
                                     <?php if ($recurr->recurrence_number){ ?>
-                                        <input type="hidden" name="recurrence_number" id="recurrence_number" value="<?php echo $recurr->recurrence_number;?>"></input>
+                                        <input type="hidden" name="recurrence_number" id="recurrence_number" value="<?php echo $recurr->recurrence_number;?>">
                                     <?php } ?>
                                     <label></label>
                                 </li>
@@ -387,12 +392,17 @@ $params = $params->toArray();
                                     case 5:
                                         $anticipation	= $this->jemsettings->recurrence_anticipation_year;
                                         break;
+                                    case 6:
+                                        $anticipation	= $this->jemsettings->recurrence_anticipation_lastday;
+                                        break;
                                     default:
                                         $anticipation	= $this->jemsettings->recurrence_anticipation_day;
                                         break;
 
                                 }
-                                $limitdate = new Date('now + '.$anticipation.' month');
+
+                                $limitdate = new DateTime('now');
+                                $limitdate->modify('+' . $anticipation . ' month');
                                 $limitdate = $limitdate->format('d-m-Y');
                                 ?>
                                 <li id="counter_row" style="display: none;">
@@ -407,6 +417,7 @@ $params = $params->toArray();
                             <input type="hidden" name="recurrence_number" id="recurrence_number" value="<?php echo $this->item->recurrence_number;?>" />
                             <input type="hidden" name="recurrence_number_saved" id="recurrence_number_saved" value="<?php echo $this->item->recurrence_number;?>" />
                             <input type="hidden" name="recurrence_byday" id="recurrence_byday" value="<?php echo $this->item->recurrence_byday;?>" />
+                            <input type="hidden" name="recurrence_bylastday" id="recurrence_bylastday" value="<?php echo $this->item->recurrence_bylastday;?>" />
 
                             <script
                                     type="text/javascript">
@@ -417,24 +428,36 @@ $params = $params->toArray();
                                 $select_output[3] = "<?php echo Text::_ ('COM_JEM_OUTPUT_MONTH'); ?>";
                                 $select_output[4] = "<?php echo Text::_ ('COM_JEM_OUTPUT_WEEKDAY'); ?>";
                                 $select_output[5] = "<?php echo Text::_ ('COM_JEM_OUTPUT_YEAR'); ?>";
+                                $select_output[6] = "<?php echo Text::_ ('COM_JEM_OUTPUT_LASTDAY'); ?>";
 
                                 var $weekday = new Array();
-                                $weekday[0] = new Array("MO", "<?php echo Text::_ ('COM_JEM_MONDAY'); ?>");
-                                $weekday[1] = new Array("TU", "<?php echo Text::_ ('COM_JEM_TUESDAY'); ?>");
-                                $weekday[2] = new Array("WE", "<?php echo Text::_ ('COM_JEM_WEDNESDAY'); ?>");
-                                $weekday[3] = new Array("TH", "<?php echo Text::_ ('COM_JEM_THURSDAY'); ?>");
-                                $weekday[4] = new Array("FR", "<?php echo Text::_ ('COM_JEM_FRIDAY'); ?>");
-                                $weekday[5] = new Array("SA", "<?php echo Text::_ ('COM_JEM_SATURDAY'); ?>");
-                                $weekday[6] = new Array("SU", "<?php echo Text::_ ('COM_JEM_SUNDAY'); ?>");
+                                $weekday[0]  = new Array("MO", "<?php echo Text::_ ('COM_JEM_MONDAY'); ?>");
+                                $weekday[1]  = new Array("TU", "<?php echo Text::_ ('COM_JEM_TUESDAY'); ?>");
+                                $weekday[2]  = new Array("WE", "<?php echo Text::_ ('COM_JEM_WEDNESDAY'); ?>");
+                                $weekday[3]  = new Array("TH", "<?php echo Text::_ ('COM_JEM_THURSDAY'); ?>");
+                                $weekday[4]  = new Array("FR", "<?php echo Text::_ ('COM_JEM_FRIDAY'); ?>");
+                                $weekday[5]  = new Array("SA", "<?php echo Text::_ ('COM_JEM_SATURDAY'); ?>");
+                                $weekday[6]  = new Array("SU", "<?php echo Text::_ ('COM_JEM_SUNDAY'); ?>");
 
                                 var $before_last = "<?php echo Text::_ ('COM_JEM_BEFORE_LAST'); ?>";
                                 var $last = "<?php echo Text::_ ('COM_JEM_LAST'); ?>";
+
+                                var $lastday = new Array();
+                                $lastday[0]  = new Array("L1", "<?php echo Text::_ ('COM_JEM_LAST_DAY'); ?>");
+                                $lastday[1]  = new Array("L2", "<?php echo Text::_ ('COM_JEM_LAST_DAY_SECOND'); ?>");
+                                $lastday[2]  = new Array("L3", "<?php echo Text::_ ('COM_JEM_LAST_DAY_THIRD'); ?>");
+                                $lastday[3]  = new Array("L4", "<?php echo Text::_ ('COM_JEM_LAST_DAY_FOURTH'); ?>");
+                                $lastday[4]  = new Array("L5", "<?php echo Text::_ ('COM_JEM_LAST_DAY_FIFTH'); ?>");
+                                $lastday[5]  = new Array("L6", "<?php echo Text::_ ('COM_JEM_LAST_DAY_SIXTH'); ?>");
+                                $lastday[6]  = new Array("L7", "<?php echo Text::_ ('COM_JEM_LAST_DAY_SEVEN'); ?>");
+
                                 start_recurrencescript("jform_recurrence_type");
                                 -->
                             </script>
                             <?php /* show "old" recurrence settings for information */
                             if (!empty($this->item->recurr_bak->recurrence_type)) {
                                 $recurr_type = '';
+                                $recurr_info = '';
                                 $recurrence_first_id = $this->item->recurr_bak->recurrence_first_id;
                                 $rlDate = $this->item->recurr_bak->recurrence_limit_date;
                                 if (!empty($rlDate)) {
@@ -483,6 +506,23 @@ $params = $params->toArray();
                                         $recurr_info = str_ireplace('[placeholder]',
                                             $this->item->recurr_bak->recurrence_number,
                                             Text::_('COM_JEM_OUTPUT_YEAR'));
+                                        break;
+                                    case 6:
+                                        $recurr_type = Text::_('COM_JEM_LASTDAY');
+                                        $recurr_bylastday = $this->item->recurr_bak->recurrence_bylastday;
+                                        $recurr_num  = $this->item->recurr_bak->recurrence_number;
+                                        $recurr_info = str_ireplace('[placeholder]',
+                                            $this->item->recurr_bak->recurrence_number,
+                                            Text::_('COM_JEM_OUTPUT_LASTDAY'));
+                                        $recurr_lastdays = str_ireplace(array('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7'),
+                                            array(Text::_('COM_JEM_LAST_DAY'), Text::_('COM_JEM_LAST_DAY_SECOND'),
+                                                Text::_('COM_JEM_LAST_DAY_THIRD'), Text::_('COM_JEM_LAST_DAY_FOURTH'),
+                                                Text::_('COM_JEM_LAST_DAY_FIFTH'), Text::_('COM_JEM_LAST_DAY_SIXTH'),
+                                                Text::_('COM_JEM_LAST_DAY_SEVEN')),
+                                            $recurr_bylastday);
+                                        $recurr_info = str_ireplace(array('[placeholder]', '[placeholder_lastday]'),
+                                            array($recurr_num, $recurr_lastdays),
+                                            Text::_('COM_JEM_OUTPUT_LASTDAY'));
                                         break;
                                     default:
                                         break;
@@ -574,7 +614,7 @@ $params = $params->toArray();
                                 </ul>
                             </fieldset>
 
-                            <script type="text/javascript">
+                            <script>
                                 <!--
                                 starter("<?php
                                     echo Text::_ ( 'COM_JEM_META_ERROR' );

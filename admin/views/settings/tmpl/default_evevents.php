@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -23,19 +23,21 @@ $params['show_article_options'] = '1';
 $params['show_urls_images_backend'] = '0';
 $params['show_urls_images_frontend'] = '0';
 endif;
+
+$group = 'globalattribs';
 ?>
 
 <div class="width-100" style="padding: 10px 1vw;">
     <fieldset class="options-form">
-		<legend><?php echo Text::_('COM_JEM_EVENTS'); ?></legend>
+		<legend><?php echo Text::_('COM_JEM_SETTINGS_EVENT_PART'); ?></legend>
 		<ul class="adminformlist">
 			<?php foreach ($this->form->getFieldset('evevents') as $field): ?>
-				<li><?php echo $field->label; ?> <?php echo $field->input; ?></li>
+                <li><div class="label-form"><?php echo $this->form->renderfield($field->fieldname,$group); ?></div></li>
 			<?php endforeach; ?>
 		</ul>
 		<ul class="adminformlist">
 			<?php foreach ($this->form->getFieldset('basic') as $field): ?>
-				<li><?php echo $field->label; ?> <?php echo $field->input; ?></li>
+                <li><div class="label-form"><?php echo $this->form->renderfield($field->fieldname,$group); ?></div></li>
 			<?php endforeach; ?>
 		</ul>
 	</fieldset>

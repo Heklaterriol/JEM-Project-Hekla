@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -91,14 +91,14 @@ if ($jemsettings->oldevent > 0) {
                 echo JemOutput::formatSchemaOrgDateTime($this->item->dates, $this->item->times,$this->item->enddates, $this->item->endtimes);
                 ?>
             </dd>
-            <?php if ($this->item->locid != 0) : ?>
+            <?php if (($this->item->locid != 0) && ($params->get('event_show_venue_name') == 1)) : ?>
                 <dt class="where"><?php echo Text::_('COM_JEM_WHERE'); ?>:</dt>
                 <dd class="where"><?php
                     if (($params->get('event_show_detlinkvenue') == 1) && (!empty($this->item->url))) :
                         ?><a target="_blank" href="<?php echo $this->item->url; ?>"><?php echo $this->escape($this->item->venue); ?></a><?php
                     elseif (($params->get('event_show_detlinkvenue') == 2) && (!empty($this->item->venueslug))) :
                         ?><a href="<?php echo Route::_(JemHelperRoute::getVenueRoute($this->item->venueslug)); ?>"><?php echo $this->item->venue; ?></a><?php
-                    else/*if ($params->get('event_show_detlinkvenue') == 0)*/ :
+                    else :
                         echo $this->escape($this->item->venue);
                     endif;
 
@@ -112,23 +112,24 @@ if ($jemsettings->oldevent > 0) {
             <?php
             endif;
             $n = is_array($this->categories) ? count($this->categories) : 0;
-            ?>
+            if ($params->get('event_show_category') == 1) : ?>
 
             <dt class="category"><?php echo $n < 2 ? Text::_('COM_JEM_CATEGORY') : Text::_('COM_JEM_CATEGORIES'); ?>:</dt>
             <dd class="category">
                 <?php
-                $i = 0;
-                foreach ((array)$this->categories as $category) :
-                    ?><a href="<?php echo Route::_(JemHelperRoute::getCategoryRoute($category->catslug)); ?>"><?php echo $this->escape($category->catname); ?></a><?php
-                    $i++;
-                    if ($i != $n) :
+                	foreach ((array)$this->categories as $i => $category) {
+        				if ($i > 0) {
                         echo ', ';
+        				}
+       					if ($params->get('event_link_category') == 1) {
+            				echo '<a href="' . Route::_(JemHelperRoute::getCategoryRoute($category->catslug)) . '">' . $this->escape($category->catname) . '</a>';
+        				} else {
+            				echo $this->escape($category->catname);
+            			}
+            		}
+            	echo '</dd>';
                     endif;
-                endforeach;
-                ?>
-            </dd>
-
-            <?php
+            
             for ($cr = 1; $cr <= 10; $cr++) {
                 $currentRow = $this->item->{'custom'.$cr};
                 if (preg_match('%^http(s)?://%', $currentRow)) {
@@ -188,7 +189,11 @@ if ($jemsettings->oldevent > 0) {
 
                 <?php
                 if ($params->get('access-view')) {
-                    echo $this->item->text;
+                    if (!$params->get('event_show_intro') && $this->item->fulltext != null) {
+                        echo $this->item->fulltext;
+                    } else {
+                        echo $this->item->text;
+                    }
                 }
                 /* optional teaser intro text for guests - NOT SUPPORTED YET */
                 elseif (0 /*$params->get('event_show_noauth') == true and  $user->get('guest')*/ ) {
@@ -196,7 +201,7 @@ if ($jemsettings->oldevent > 0) {
                     // Optional link to let them register to see the whole event.
                     if ($params->get('event_show_readmore') && $this->item->fulltext != null) {
                         $link1 = Route::_('index.php?option=com_users&view=login');
-                        $link = new JUri($link1);
+                        $link = new Uri($link1);
                         echo '<p class="readmore">';
                         echo '<a href="'.$link.'">';
                         if ($params->get('event_alternative_readmore') == false) {
@@ -395,45 +400,68 @@ if ($jemsettings->oldevent > 0) {
         <!-- Registration -->
         <?php if ($this->showAttendees && $params->get('event_show_registration', '1')) : ?>
             <hr class="jem-hr">
-            <h2 class="register"><?php echo Text::_('COM_JEM_REGISTRATION'); ?></h2>
-
+           
             <?php
             $timeNow = time();
 
             switch ($this->e_reg) {
                 case 0:
                     //Event without registration (NO)
-                    echo Text::_('COM_JEM_VENUE_DESCRIPTION');
                     break;
                 case 1:
                     //Event with registration (YES with or witout UNTIL)
+                         echo '<h2 class="register">' . Text::_('COM_JEM_REGISTRATION') . '</h2>';
                     echo $this->loadTemplate('attendees');
                     if($this->dateUnregistationUntil) {
-                        echo ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . date('Y-m-d H:i', $this->dateUnregistationUntil);
+                        echo ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . HTMLHelper::_('date', $this->dateUnregistationUntil, Text::_('DATE_FORMAT_LC2'));
                     }
                     break;
                 case 2:
                     //Event with date starting registration (FROM with or witout UNTIL)
+                        echo '<h2 class="register">' . Text::_('COM_JEM_REGISTRATION') . '</h2>';
                     if($this->dateRegistationFrom > $timeNow) {
-                        echo Text::_('COM_JEM_EVENT_REGISTRATION_WILLBE_FROM') . ' ' . date('Y-m-d H:i', $this->dateRegistationFrom);
+                        echo Text::_('COM_JEM_EVENT_REGISTRATION_WILLBE_FROM') . ' ' . HTMLHelper::_('date', $this->dateRegistationFrom, Text::_('DATE_FORMAT_LC2'));
                     }else if ($this->allowRegistration) {
-                        echo Text::_('COM_JEM_EVENT_REGISTRATION_IS_FROM') . ' ' . date('Y-m-d H:i', $this->dateRegistationFrom);
+                        echo Text::_('COM_JEM_EVENT_REGISTRATION_IS_FROM') . ' ' . HTMLHelper::_('date', $this->dateRegistationFrom, Text::_('DATE_FORMAT_LC2'));
                         if($this->dateRegistationUntil){
-                            echo " " . Text::_('COM_JEM_UNTIL') . ' ' . date('Y-m-d H:i', $this->dateRegistationUntil);
+                            echo " " . mb_strtolower(Text::_('COM_JEM_UNTIL')) . ' ' . HTMLHelper::_('date', $this->dateRegistationUntil, Text::_('DATE_FORMAT_LC2'));
                         }
                         echo $this->loadTemplate('attendees');
 
                         //Event with date starting annulation
                         if($this->dateUnregistationUntil) {
-                            echo "<br>" . ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . date('Y-m-d H:i', $this->dateUnregistationUntil);
+                            echo "<br>" . ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . HTMLHelper::_('date', $this->dateUnregistationUntil, Text::_('DATE_FORMAT_LC2'));
                         }
-                    }else if($this->dateRegistationUntil < $timeNow) {
-                        echo Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL') . ' ' . date('Y-m-d H:i', $this->dateRegistationUntil);
+                    }else if($this->dateRegistationUntil !== false && $this->dateRegistationUntil < $timeNow) {
+                        echo Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL') . ' ' . HTMLHelper::_('date', $this->dateRegistationUntil, Text::_('DATE_FORMAT_LC2'));
                         echo $this->loadTemplate('attendees');
 
                         //Event with date starting annulation
                         if($this->dateUnregistationUntil) {
-                            echo ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . date('Y-m-d H:i', $this->dateUnregistationUntil);
+                            echo ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . HTMLHelper::_('date', $this->dateUnregistationUntil, Text::_('DATE_FORMAT_LC2'));
+                        }
+                    } else {
+                        // open registration to the end of event
+                        if($this->item->enddates){
+                            $endDateEvent = strtotime($this->item->enddates . ' ' . ($this->item->endtimes ? $this->item->endtimes : '23:59:59'));
+                            if($timeNow <= $endDateEvent){
+                                echo Text::_('COM_JEM_EVENT_REGISTRATION_IS_UNTIL');
+                            } else {
+                                echo Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL');
+                            }
+                            echo ' ' . HTMLHelper::_('date', $endDateEvent, Text::_('DATE_FORMAT_LC2'));
+                            echo $this->loadTemplate('attendees');
+                        }else{
+                            if(!empty($this->item->dates)) {
+                                $endDateEvent = strtotime($this->item->dates . ' ' . ($this->item->times ? $this->item->times : '23:59:59'));
+                                if($timeNow <= $endDateEvent){
+                                    echo Text::_('COM_JEM_EVENT_REGISTRATION_IS_UNTIL');
+                                } else {
+                                    echo Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL');
+                                }
+                                echo ' ' . HTMLHelper::_('date', $endDateEvent, Text::_('DATE_FORMAT_LC2'));
+                                echo $this->loadTemplate('attendees');
+                            }
                         }
                     }
                     break;

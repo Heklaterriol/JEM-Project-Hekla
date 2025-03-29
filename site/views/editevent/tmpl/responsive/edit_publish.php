@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -15,10 +15,15 @@ use Joomla\CMS\HTML\HTMLHelper;
 <fieldset class="adminform">
 	<legend><?php echo Text::_('COM_JEM_EDITEVENT_PUBLISH_TAB'); ?></legend>
 	<dl class="jem-dl">
-		<dt><?php echo $this->form->getLabel('featured'); ?></dt>
-		<dd><?php echo $this->form->getInput('featured'); ?></dd>
+
 		<dt><?php echo $this->form->getLabel('published'); ?></dt>
 		<dd><?php echo $this->form->getInput('published'); ?></dd>
+        <dt><?php echo $this->form->getLabel('featured'); ?></dt>
+        <dd><?php echo $this->form->getInput('featured'); ?></dd>
+        <dt><?php echo $this->form->getLabel('publish_up'); ?></dt>
+        <dd><?php echo $this->form->getInput('publish_up'); ?></dd>
+        <dt><?php echo $this->form->getLabel('publish_down'); ?></dt>
+        <dd><?php echo $this->form->getInput('publish_down'); ?></dd>
 		<dt><?php echo $this->form->getLabel('access'); ?></dt>
 		<dd><?php
 			echo HTMLHelper::_(
@@ -80,7 +85,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 		</div>
 		<!-- include the metatags end-->
 
-		<script type="text/javascript">
+		<script>
 			<!--
 			starter("<?php
 						echo Text::_('COM_JEM_META_ERROR');

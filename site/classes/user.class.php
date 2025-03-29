@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -344,12 +344,28 @@ abstract class JemUserAbstract extends User
 		}
 
 		// We have to check ALL categories, also those not seen by user.
+        $orderBy = $jemsettings->categories_order;
+        switch ($orderBy){
+            case 3:
+                $order = 'c.catname DESC, c.parent_id, c.lft';
+                break;
+            case 2:
+                $order = 'c.catname ASC, c.parent_id, c.lft';
+                break;
+            case 1:
+                $order = 'c.id DESC, c.parent_id ASC, c.lft';
+                break;
+            case 0:
+                $order = 'c.id ASC, c.parent_id ASC, c.lft';
+                break;
+        }
+
         $db = Factory::getContainer()->get('DatabaseDriver');
 		$query  = 'SELECT DISTINCT c.*' . $disable
 		        . ' FROM #__jem_categories AS c'
 		        . ' WHERE c.published = 1'
 		        . $where
-		        . ' ORDER BY c.lft';
+		        . ' ORDER BY ' . $order;
 		$db->setQuery( $query );
 		$cats = $db->loadObjectList('id');
 

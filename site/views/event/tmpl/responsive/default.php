@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -99,14 +99,14 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
               ?>
             </span>
                     </dd>
-                    <?php if ($this->item->locid != 0) : ?>
+                    <?php if ((!empty($this->item->locid)) && ($params->get('event_show_venue_name') == 1)) : ?>
                         <dt class="jem-where hasTooltip" data-original-title="<?php echo Text::_('COM_JEM_WHERE'); ?>"><?php echo Text::_('COM_JEM_WHERE'); ?>:</dt>
                         <dd class="jem-where"><?php
                             if (($params->get('event_show_detlinkvenue') == 1) && (!empty($this->item->url))) :
                                 ?><a target="_blank" href="<?php echo $this->item->url; ?>"><?php echo $this->escape($this->item->venue); ?></a><?php
                             elseif (($params->get('event_show_detlinkvenue') == 2) && (!empty($this->item->venueslug))) :
                                 ?><a href="<?php echo Route::_(JemHelperRoute::getVenueRoute($this->item->venueslug)); ?>"><?php echo $this->item->venue; ?></a><?php
-                            else/*if ($params->get('event_show_detlinkvenue') == 0)*/ :
+                            else :
                                 echo $this->escape($this->item->venue);
                             endif;
 
@@ -120,25 +120,26 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
                     <?php
                     endif;
                     $n = is_array($this->categories) ? count($this->categories) : 0;
-                    ?>
+                    if ($params->get('event_show_category') == 1) : ?>
 
                     <dt class="jem-category hasTooltip" data-original-title="<?php echo $n < 2 ? Text::_('COM_JEM_CATEGORY') : Text::_('COM_JEM_CATEGORIES'); ?>">
                         <?php echo $n < 2 ? Text::_('COM_JEM_CATEGORY') : Text::_('COM_JEM_CATEGORIES'); ?>:
                     </dt>
                     <dd class="jem-category">
                         <?php
-                        $i = 0;
-                        foreach ((array)$this->categories as $category) :
-                            ?><a href="<?php echo Route::_(JemHelperRoute::getCategoryRoute($category->catslug)); ?>"><?php echo $this->escape($category->catname); ?></a><?php
-                            $i++;
-                            if ($i != $n) :
-                                echo ', ';
-                            endif;
-                        endforeach;
-                        ?>
-                    </dd>
+                	foreach ((array)$this->categories as $i => $category) {
+        				if ($i > 0) {
+                        		echo ', ';
+        				}
+       					if ($params->get('event_link_category') == 1) {
+            				echo '<a href="' . Route::_(JemHelperRoute::getCategoryRoute($category->catslug)) . '">' . $this->escape($category->catname) . '</a>';
+        				} else {
+            				echo $this->escape($category->catname);
+            			}
+            		}
+            		echo '</dd>';
+                        	endif;
 
-                    <?php
                     for ($cr = 1; $cr <= 10; $cr++) {
                         $currentRow = $this->item->{'custom'.$cr};
                         if (preg_match('%^http(s)?://%', $currentRow)) {
@@ -208,7 +209,11 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
 
                 <?php
                 if ($params->get('access-view')) {
-                    echo $this->item->text;
+                    if (!$params->get('event_show_intro') && $this->item->fulltext != null) {
+                        echo $this->item->fulltext;
+                    } else {
+                        echo $this->item->text;
+                    }
                 }
                 /* optional teaser intro text for guests - NOT SUPPORTED YET */
                 elseif (0 /*$params->get('event_show_noauth') == true and  $user->get('guest')*/ ) {
@@ -274,8 +279,8 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
         <?php $this->attachments = $this->item->attachments; ?>
         <?php echo $this->loadTemplate('attachments'); ?>
 
-        <!--  	Venue  -->
-        <?php if (($this->item->locid != 0) && !empty($this->item->venue) && $params->get('event_show_venue', '1')) : ?>
+        <!-- Venue -->
+        <?php if ((!empty($this->item->locid)) && !empty($this->item->venue) && $params->get('event_show_venue', '1')) : ?>
             <p></p>
             <hr class="jem-hr">
 
@@ -300,7 +305,7 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
                                         echo '<a target="_blank" href="' . $this->item->url . '">' . $this->escape($this->item->venue) . '</a>';
                                     elseif (($params->get('event_show_detlinkvenue') == 2) && (!empty($this->item->venueslug))) :
                                         echo '<a href="' . Route::_(JemHelperRoute::getVenueRoute($this->item->venueslug)) . '">' . $this->escape($this->item->venue) . '</a>';
-                                    else/*if ($params->get('event_show_detlinkvenue') == 0)*/ :
+                                    else :
                                         echo $this->escape($this->item->venue);
                                     endif;
                                     ?>
@@ -388,7 +393,7 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
                                         echo '<a target="_blank" href="' . $this->item->url . '">' . $this->escape($this->item->venue) . '</a>';
                                     elseif (($params->get('event_show_detlinkvenue') == 2) && (!empty($this->item->venueslug))) :
                                         echo '<a href="' . Route::_(JemHelperRoute::getVenueRoute($this->item->venueslug)) . '">' . $this->escape($this->item->venue) . '</a>';
-                                    else/*if ($params->get('event_show_detlinkvenue') == 0)*/ :
+                                    else :
                                         echo $this->escape($this->item->venue);
                                     endif;
                                     ?>
@@ -434,55 +439,107 @@ if ($params->get('access-view')) { /* This will show nothings otherwise - ??? */
                 <?php echo $this->loadTemplate('attachments'); ?>
 
             </div>
+
+        <?php elseif (empty($this->item->locid)) : ?>
+            <div itemtype="https://schema.org/Place" itemscope itemprop="location" style="display: none;">
+                <meta itemprop="name" content="None"/>
+            </div>
+
+        <?php else : ?>
+            <div itemtype="https://schema.org/Place" itemscope itemprop="location" style="display: none;">
+                <meta itemprop="name" content="<?php echo $this->escape($this->item->venue); ?>" />
+                <div itemprop="address" itemscope itemtype="https://schema.org/PostalAddress" style="display: none;">
+                    <?php if ($this->item->street) : ?>
+                        <meta itemprop="streetAddress" content="<?php echo $this->escape($this->item->street); ?>">
+                    <?php endif; ?>
+                    <?php if ($this->item->postalCode) : ?>
+                        <meta itemprop="postalCode" content="<?php echo $this->escape($this->item->postalCode); ?>">
+                    <?php endif; ?>
+                    <?php if ($this->item->city) : ?>
+                        <meta itemprop="addressLocality" content="<?php echo $this->escape($this->item->city); ?>">
+                    <?php endif; ?>
+                    <?php if ($this->item->state) : ?>
+                        <meta itemprop="addressRegion" content="<?php echo $this->escape($this->item->state); ?>">
+                    <?php endif; ?>
+                    <?php if ($this->item->country) : ?>
+                        <meta itemprop="addressCountry" content="<?php echo $this->escape($this->item->country); ?>">
+                    <?php endif; ?>
+                </div>
+            </div>
         <?php endif; ?>
 
         <!-- Registration -->
-        <?php if ($this->showAttendees && $params->get('event_show_registration', '1')) { ?>
+        <?php if ($this->showAttendees && $params->get('event_show_registration', '0')) { ?>
             <hr class="jem-hr">
-            <h2 class="register"><?php echo Text::_('COM_JEM_REGISTRATION'); ?></h2>
+            <dl class="jem-dl floattext">
+                <?php
+                $timeNow = time();
 
-            <?php
-            $timeNow = time();
-
-            switch ($this->e_reg) {
-                case 0:
-                    //Event without registration (NO)
-                    echo Text::_('COM_JEM_VENUE_DESCRIPTION');
-                    break;
-                case 1:
-                    //Event with registration (YES with or witout UNTIL)
-                    echo $this->loadTemplate('attendees');
-                    if($this->dateUnregistationUntil) {
-                        echo ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . date('Y-m-d H:i', $this->dateUnregistationUntil);
-                    }
-                    break;
-                case 2:
-                    //Event with date starting registration (FROM with or witout UNTIL)
-                    if($this->dateRegistationFrom > $timeNow) {
-                        echo Text::_('COM_JEM_EVENT_REGISTRATION_WILLBE_FROM') . ' ' . date('Y-m-d H:i', $this->dateRegistationFrom);
-                    }else if ($this->allowRegistration) {
-                        echo Text::_('COM_JEM_EVENT_REGISTRATION_IS_FROM') . ' ' . date('Y-m-d H:i', $this->dateRegistationFrom);
-                        if($this->dateRegistationUntil){
-                            echo " " . Text::_('COM_JEM_UNTIL') . ' ' . date('Y-m-d H:i', $this->dateRegistationUntil);
-                        }
+                switch ($this->e_reg) {
+                    case 0:
+                        //Event without registration (NO)
+                        break;
+                    case 1:
+                        //Event with registration (YES with or witout UNTIL)
+                         echo '<h2 class="register">' . Text::_('COM_JEM_REGISTRATION') . '</h2>';
                         echo $this->loadTemplate('attendees');
-
-                        //Event with date starting annulation
                         if($this->dateUnregistationUntil) {
-                            echo "<br>" . ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . date('Y-m-d H:i', $this->dateUnregistationUntil);
+                            echo '<dt>' . ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . '</dt><dd>' . HTMLHelper::_('date', $this->dateUnregistationUntil, Text::_('DATE_FORMAT_LC2')) . '</dd>';
                         }
-                    }else if($this->dateRegistationUntil < $timeNow) {
-                        echo Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL') . ' ' . date('Y-m-d H:i', $this->dateRegistationUntil);
-                        echo $this->loadTemplate('attendees');
+                        break;
+                    case 2:
+                        //Event with date starting registration (FROM with or witout UNTIL)
+                        echo '<h2 class="register">' . Text::_('COM_JEM_REGISTRATION') . '</h2>';
+                        if($this->dateRegistationFrom > $timeNow) {
+                            echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_WILLBE_FROM') . '</dt><dd>' . HTMLHelper::_('date', $this->dateRegistationFrom, Text::_('DATE_FORMAT_LC2'));
+                        }else if ($this->allowRegistration) {
+                            echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_IS_FROM') . '</dt><dd>' . HTMLHelper::_('date', $this->dateRegistationFrom, Text::_('DATE_FORMAT_LC2'));
+                            if($this->dateRegistationUntil){
+                                echo " " . mb_strtolower(Text::_('COM_JEM_UNTIL')) . ' ' . HTMLHelper::_('date', $this->dateRegistationUntil, Text::_('DATE_FORMAT_LC2'));
+                            }
+                            echo "</dd>";
+                            echo $this->loadTemplate('attendees');
 
-                        //Event with date starting annulation
-                        if($this->dateUnregistationUntil) {
-                            echo ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . ' ' . date('Y-m-d H:i', $this->dateUnregistationUntil);
+                            //Event with date starting annulation
+                            if($this->dateUnregistationUntil) {
+                                echo '<dt>' . ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . '</dt><dd>' . HTMLHelper::_('date', $this->dateUnregistationUntil, Text::_('DATE_FORMAT_LC2')) . '</dd>';
+                            }
+                        }else if($this->dateRegistationUntil !== false && $this->dateRegistationUntil < $timeNow) {
+                            echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL') . '</dt><dd>' . HTMLHelper::_('date', $this->dateRegistationUntil, Text::_('DATE_FORMAT_LC2')) .  '</dd>';
+                            echo $this->loadTemplate('attendees');
+
+                            //Event with date starting annulation
+                            if($this->dateUnregistationUntil) {
+                                echo '<dt>' . ($this->allowAnnulation? Text::_('COM_JEM_EVENT_ANNULATION_NOTWILLBE_FROM') : Text::_('COM_JEM_EVENT_ANNULATION_ISNOT_FROM')) . '</dt><dd>' . HTMLHelper::_('date', $this->dateUnregistationUntil, Text::_('DATE_FORMAT_LC2')) . '</dd>';
+                            }
+                        } else {
+                            // open registration to the end of event
+                            if($this->item->enddates){
+                                $endDateEvent = strtotime($this->item->enddates . ' ' . ($this->item->endtimes ? $this->item->endtimes : '23:59:59'));
+                                if($timeNow <= $endDateEvent){
+                                    echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_IS_UNTIL');
+                                } else {
+                                    echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL');
+                                }
+                                echo '</dt><dd>' . HTMLHelper::_('date', $endDateEvent, Text::_('DATE_FORMAT_LC2')) . '</dd>';
+                                echo $this->loadTemplate('attendees');
+                            }else{
+                                if(!empty($this->item->dates)) {
+                                    $endDateEvent = strtotime($this->item->dates . ' ' . ($this->item->times ? $this->item->times : '23:59:59'));
+                                    if($timeNow <= $endDateEvent){
+                                        echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_IS_UNTIL');
+                                    } else {
+                                        echo '<dt>' . Text::_('COM_JEM_EVENT_REGISTRATION_WAS_UNTIL');
+                                    }
+                                    echo '</dt><dd>' . HTMLHelper::_('date', $endDateEvent, Text::_('DATE_FORMAT_LC2')) . '</dd>';
+                                    echo $this->loadTemplate('attendees');
+                                }
+                            }
                         }
-                    }
-                    break;
-            }
-        } ?>
+                        break;
+                } ?>
+            </dl>
+        <?php } ?>
 
         <?php if (!empty($this->item->pluginevent->onEventEnd)) : ?>
             <hr class="jem-hr">

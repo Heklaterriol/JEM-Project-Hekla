@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="2.5" type="plugin" group="content" method="upgrade">
 	<name>plg_content_jemlistevents</name>
-	<creationDate>October 2024</creationDate>
+	<creationDate>February 2025</creationDate>
 	<author>JEM Community</author>
 	<authorEmail>info@joomlaeventmanager.net</authorEmail>
 	<authorUrl>www.joomlaeventmanager.net</authorUrl>
-	<copyright>copyright (C) 2013-2024 joomlaeventmanager.net</copyright>
+	<copyright>copyright (C) 2013-2025 joomlaeventmanager.net</copyright>
 	<license>https://www.gnu.org/licenses/gpl-3.0 GNU/GPL</license>
-	<version>4.3.0</version>
-	<description>PLG_CONTENT_JEMLISTEVENTS_XML_DESCRIPTION</description>
+	<version>4.3.2</version>
+	<description>PLG_CONTENT_JEMLISTEVENTS_XML_INSTRUCTION</description>
 
 	<files>
 		<filename plugin="jemlistevents">jemlistevents.php</filename>
 		<filename>index.html</filename>
 		<folder>language</folder>
 	</files>
+	<media destination="plg_content_jemlistevents" folder="media">
+		<folder>css</folder>
+	</media>
 	<languages>
         <language tag="en-GB">language/en-GB/plg_content_jemlistevents.ini</language>
         <language tag="en-GB">language/en-GB/plg_content_jemlistevents.sys.ini</language>
@@ -32,8 +35,11 @@
 					<option value="today"     >PLG_CONTENT_JEMLISTEVENTS_TODAYS_EVENTS</option>
 					<option value="unfinished">PLG_CONTENT_JEMLISTEVENTS_UNFINISHED_EVENTS</option>
 					<option value="upcoming"  >PLG_CONTENT_JEMLISTEVENTS_UPCOMING_EVENTS</option>
+					<option value="ongoing"  >PLG_CONTENT_JEMLISTEVENTS_ONGOING_EVENTS</option>
 					<option value="archived"  >PLG_CONTENT_JEMLISTEVENTS_ARCHIVED_EVENTS</option>
 					<option value="newest"    >PLG_CONTENT_JEMLISTEVENTS_NEWEST_EVENTS</option>
+					<option value="open"      >PLG_CONTENT_JEMLISTEVENTS_OPEN_EVENTS</option>
+					<option value="all"       >PLG_CONTENT_JEMLISTEVENTS_ALL_EVENTS</option>
 				</field>
 				<field name="show_featured" type="radio"
 					class="btn-group btn-group-yesno"

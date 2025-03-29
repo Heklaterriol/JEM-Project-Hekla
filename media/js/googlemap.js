@@ -56,7 +56,7 @@ function initialize() {
                     escapeHTML(street) + "<br />" + 
                     escapeHTML(postalCode) + "<br />" + 
                     escapeHTML(city);
-
+        
         var myOptions = {
             content: boxText
             , disableAutoPan: false
@@ -163,6 +163,5 @@ function error() {
     var text = "";
     document.getElementById('map-canvas').innerHTML = text;
 }
-
 
 google.maps.event.addDomListener(window, 'load', initialize);

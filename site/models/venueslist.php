@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    JEM
- * @copyright  (C) 2013-2024 joomlaeventmanager.net
+ * @copyright  (C) 2013-2025 joomlaeventmanager.net
  * @copyright  (C) 2005-2009 Christoph Lukes
  * @license    https://www.gnu.org/licenses/gpl-3.0 GNU/GPL
  */
@@ -168,8 +168,28 @@ class JemModelVenueslist extends ListModel
 				}
 			}
 		}
-		
-		# ordering
+
+        ####################
+        ## FILTER-PUBLISH ##
+        ####################
+
+        // all together: if published or the user is creator of the venue or allowed to edit or publish venues
+        if (empty($user->id)) {
+            $query->where(' a.published = 1');
+        }
+        // no limit if user can publish or edit foreign venues
+        elseif ($user->can(array('edit', 'publish'), 'venue')) {
+            $query->where(' a.published IN (0,1)');
+        }
+        // user maybe creator
+        else {
+            $query->where(' (a.published = 1 OR (a.published = 0 AND a.created_by = ' . $this->_db->Quote($user->id) . '))');
+        }
+
+        ##############
+        ## ORDERING ##
+        ##############
+
 		$orderby = $this->getState('filter.orderby');
 		
 		if ($orderby) {
